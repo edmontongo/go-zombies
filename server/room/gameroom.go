@@ -15,6 +15,10 @@ type Room struct {
 	players map[Id]*player
 }
 
+func New() Room {
+	return Room{map[Id]*player{}}
+}
+
 // Zombies returns a count of zombies in the room.
 func (r *Room) Zombies() int {
 	return r.count(Zombie)
