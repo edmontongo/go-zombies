@@ -31,5 +31,16 @@ func roomStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func registerPlayer(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer("player", room.Human, net.ParseIP(req.RemoteAddr)))
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	name := req.FormValue("name")
+	if name == "" {
+		http.Error(w, "No name provided!", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, room.Human, net.ParseIP(req.RemoteAddr)))
 }
