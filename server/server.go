@@ -19,6 +19,7 @@ func main() {
 
 	http.HandleFunc("/status", roomStatus)
 	http.HandleFunc("/register", registerPlayer)
+	http.HandleFunc("/collision", collidePlayer)
 
 	panic(http.ListenAndServe(*addr, nil))
 }
@@ -43,4 +44,31 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, room.Human, net.ParseIP(req.RemoteAddr)))
+}
+
+func collidePlayer(w http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	name := req.FormValue("id")
+	if name == "" {
+		http.Error(w, "No id provided!", http.StatusBadRequest)
+		return
+	}
+
+	id, err := room.IdFromString(name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	r, err := sim.Collision(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	fmt.Fprintf(w, `{"role": %s}`, r)
 }

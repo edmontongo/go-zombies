@@ -11,12 +11,25 @@ import (
 	"time"
 )
 
+type queuedCollision struct {
+	*player
+	response chan<- Role
+}
+
 type Room struct {
-	players map[Id]*player
+	players        map[Id]*player
+	collisionQueue chan<- queuedCollision
 }
 
 func New() Room {
-	return Room{map[Id]*player{}}
+	c := make(chan queuedCollision)
+	r := Room{map[Id]*player{}, c}
+	go r.collisionManager(c)
+	return r
+}
+
+func (r *Room) Close() {
+	close(r.collisionQueue)
 }
 
 // Zombies returns a count of zombies in the room.
@@ -39,29 +52,40 @@ func (r *Room) count(role Role) int {
 	return count
 }
 
-// Collide accepts two player ids and determines what there roles are after an interaction.
-// If an error is returned than roles remain unchanged.
-func (r *Room) Collide(id1, id2 Id) (r1, r2 Role, err error) {
-	if id1 == id2 {
-		err = fmt.Errorf("IDs %v and %v are equal", id1, id2)
-		return
-	}
-
-	p1, err := r.player(id1)
-	if err != nil {
-		return
-	}
-	p2, err := r.player(id2)
-	if err != nil {
-		return
-	}
-
+// Collide accepts two players and determines what there roles are after an interaction.
+func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
 	// Switch players for now, better math will be implemented later.
 	p2.Role, p1.Role = p1.Role, p2.Role
 
-	return p1.Role, p2.Role, nil
+	return p1.Role, p2.Role
 }
 
+/// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
+func (r *Room) Collision(id Id) (Role, error) {
+	p, err := r.player(id)
+	if err != nil {
+		return p.Role, err
+	}
+
+	c := make(chan Role)
+	r.collisionQueue <- queuedCollision{p, c}
+	<-c
+
+	return p.Role, nil
+}
+
+func (r *Room) collisionManager(c <-chan queuedCollision) {
+	for p1 := range c {
+		t := time.After(time.Second)
+		select {
+		case p2 := <-c:
+			r.collide(p1.player, p2.player)
+			p2.response <- p2.Role
+		case _ = <-t:
+		}
+		p1.response <- p1.Role
+	}
+}
 func (r *Room) player(id Id) (*player, error) {
 	if p1, ok := r.players[id]; ok {
 		return p1, nil
