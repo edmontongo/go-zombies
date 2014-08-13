@@ -54,8 +54,25 @@ func (r *Room) count(role Role) int {
 
 // Collide accepts two players and determines what there roles are after an interaction.
 func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
+	if p2.Role == p1.Role {
+		return p1.Role, p2.Role
+	}
+
+	winner := rand.Float32() > 0.70
 	// Switch players for now, better math will be implemented later.
-	p2.Role, p1.Role = p1.Role, p2.Role
+	if p2.Role == Zombie {
+		if winner {
+			p1.Role == Zombie
+		} else {
+			p2.Role == Human
+		}
+	} else {
+		if winner {
+			p2.Role == Zombie
+		} else {
+			p1.Role == Human
+		}
+	}
 
 	return p1.Role, p2.Role
 }
