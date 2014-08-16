@@ -2,8 +2,10 @@ package game
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/edmontongo/go-zombies/client"
+	"github.com/edmontongo/go-zombies/server/room"
 	"github.com/hybridgroup/gobot"
 	"github.com/hybridgroup/gobot/platforms/sphero"
 )
@@ -19,6 +21,9 @@ type Robot struct {
 	Events chan Event
 
 	client *client.Client
+
+	// Track our game state
+	Role room.Role
 }
 
 type Event struct{}
@@ -75,6 +80,17 @@ func work() {
 	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
 		fmt.Printf("Collision Detected! %+v\n", data)
+		role, err := robot.client.Collide()
+		if err != nil {
+			log.Printf("Unexpected error during collision: %s", err.Error())
+			return
+		}
+		if role == room.Zombie {
+			robot.driver.SetRGB(255, 0, 0)
+		} else {
+			robot.driver.SetRGB(0, 0, 255)
+		}
+		robot.Role = role
 		robot.Events <- Event{}
 	})
 
