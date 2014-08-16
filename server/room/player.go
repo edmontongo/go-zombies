@@ -28,6 +28,15 @@ func (r Role) String() string {
 	return roleStrings[r]
 }
 
+func ResolveRole(s string) Role {
+	for i, roleString := range roleStrings {
+		if s == roleString {
+			return Role(i)
+		}
+	}
+	return Unknown
+}
+
 // Id is a unique (per room) identifier for communicating player ids with the Room.
 type Id int
 

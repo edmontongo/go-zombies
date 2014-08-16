@@ -39,7 +39,7 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 	}
 	name := req.FormValue("name")
 	if name == "" {
-		http.Error(w, "No name provided!", http.StatusBadRequest)
+		http.Error(w, `{"error": "No name provided!"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -50,7 +50,7 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 		case "zombie":
 			role = room.Zombie
 		default:
-			http.Error(w, fmt.Sprintf("Unknown role type '%s'!", req.FormValue("role")), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf(`{"error": "Unknown role type '%s'!"`, req.FormValue("role")), http.StatusBadRequest)
 		}
 	}
 
@@ -65,7 +65,7 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 	}
 	name := req.FormValue("id")
 	if name == "" {
-		http.Error(w, "No id provided!", http.StatusBadRequest)
+		http.Error(w, `{"error": "No id provided!"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -81,5 +81,5 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, `{"role": %s}`, r)
+	fmt.Fprintf(w, `{"role": "%s"}`, r)
 }
