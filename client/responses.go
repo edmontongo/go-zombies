@@ -10,6 +10,10 @@ type registerResponse struct {
 	PlayerId int
 }
 
+type collisionResponse struct {
+	Role string
+}
+
 func getResponse(url string, response interface{}) error {
 	resp, err := http.Get(url)
 

@@ -30,3 +30,14 @@ func New(name, url string, zombie bool) (*Client, error) {
 
 	return &c, nil
 }
+
+func (c *Client) Collide() (room.Role, error) {
+	request := fmt.Sprintf("%s/collision?id=%d", c.roomUrl, c.id)
+	var collision collisionResponse
+
+	if err := getResponse(request, &collision); err != nil {
+		return room.Unknown, err
+	}
+
+	return room.ResolveRole(collision.Role), nil
+}
