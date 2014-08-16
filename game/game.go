@@ -16,8 +16,11 @@ type Robot struct {
 
 	zombieFn robotFn
 	humanFn  robotFn
+
+	Events chan Event
 }
 
+type Event struct{}
 type robotFn func(Robot)
 
 var robot Robot
@@ -48,12 +51,12 @@ func Start(name string, port string) error {
 		robot.adaptor = sphero.NewSpheroAdaptor(name, port)
 		robot.driver = sphero.NewSpheroDriver(robot.adaptor, name)
 
-		robot := gobot.NewRobot(name,
+		sphero := gobot.NewRobot(name,
 			[]gobot.Connection{robot.adaptor},
 			[]gobot.Device{robot.driver},
 			work,
 		)
-		bot.AddRobot(robot)
+		bot.AddRobot(sphero)
 		bot.Start()
 	}
 
@@ -64,6 +67,7 @@ func work() {
 	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
 		fmt.Printf("Collision Detected! %+v\n", data)
+		robot.Events <- Event{}
 	})
 
 	// TODO: see which is registered, start only one

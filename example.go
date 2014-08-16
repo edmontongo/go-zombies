@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/edmontongo/go-zombies/game"
 )
 
-func sleepyZombie(zombie game.Robot) {
+func zombieClock(zombie game.Robot) {
 	c := time.Tick(1000 * time.Millisecond)
 	go func() {
 		a := 0
@@ -17,18 +18,18 @@ func sleepyZombie(zombie game.Robot) {
 				// do stuff
 				zombie.Walk(0, uint16(a%360))
 				a += 6
-				// case event, ok = <-zombie.Event:
-				// 	if !ok {
-				// 		return
-				// 	}
-				// collision
+			case event, ok := <-zombie.Events:
+				if !ok {
+					return
+				}
+				fmt.Printf("Event %v\n.", event)
 			}
 		}
 	}()
 }
 
 func main() {
-	game.RegisterZombie(sleepyZombie)
+	game.RegisterZombie(zombieClock)
 	// game.RegisterHuman(me)
 
 	// Mac:
