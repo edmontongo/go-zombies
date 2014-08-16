@@ -61,6 +61,11 @@ func Start(name string, port string) error {
 }
 
 func work() {
+	// TODO: only if not a fakeSphero
+	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
+		fmt.Printf("Collision Detected! %+v\n", data)
+	})
+
 	// TODO: see which is registered, start only one
 	robot.zombieFn(robot)
 }
