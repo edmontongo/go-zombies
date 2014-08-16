@@ -1,11 +1,16 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hybridgroup/gobot"
+)
 
 type driver interface {
+	gobot.DriverInterface
 	SetHeading(heading uint16)
 	Roll(speed uint8, heading uint16)
-	Halt() bool
+	// Halt() bool
 	SetBackLED(level uint8)
 	SetRGB(r uint8, g uint8, b uint8)
 }

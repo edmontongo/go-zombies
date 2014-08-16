@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"log"
-	"os"
 	"time"
 
 	"github.com/edmontongo/go-zombies/game"
@@ -17,8 +15,8 @@ func sleepyZombie(zombie game.Robot) {
 			select {
 			case <-c:
 				// do stuff
-				zombie.Walk(1, uint16(a%360))
-				a += 15
+				zombie.Walk(0, uint16(a%360))
+				a += 6
 				// case event, ok = <-zombie.Event:
 				// 	if !ok {
 				// 		return
@@ -37,11 +35,11 @@ func main() {
 	// /dev/tty.Sphero-WOO-AMP-SPP
 	// Windows:
 	// Linux:
-	err := game.Start("bob", "")
+	err := game.Start("bob", "/dev/tty.Sphero-WOO-AMP-SPP")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-	reader.ReadString('\n')
+	// reader := bufio.NewReader(os.Stdin)
+	// reader.ReadString('\n')
 }

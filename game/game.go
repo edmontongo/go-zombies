@@ -1,12 +1,19 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hybridgroup/gobot"
+	"github.com/hybridgroup/gobot/platforms/sphero"
+)
 
 // import "github.com/edmontongo/go-zombies/client"
 
 // Robot handler
 type Robot struct {
-	driver   driver
+	adaptor *sphero.SpheroAdaptor
+	driver  driver
+
 	zombieFn robotFn
 	humanFn  robotFn
 }
@@ -34,15 +41,26 @@ func (r Robot) Walk(speed uint8, heading uint16) {
 func Start(name string, port string) error {
 	if port == "" {
 		fmt.Printf("Welcome %s.\n", name)
-		robot.driver = &fakeSpheroDriver{}
+		// robot.driver = &fakeSpheroDriver{}
+		work()
 	} else {
-		// gobot := gobot.NewGobot()
-		// adaptor := sphero.NewSpheroAdaptor(name, port)
-		// robot.driver := sphero.NewSpheroDriver(adaptor, name)
+		bot := gobot.NewGobot()
+		robot.adaptor = sphero.NewSpheroAdaptor(name, port)
+		robot.driver = sphero.NewSpheroDriver(robot.adaptor, name)
+
+		robot := gobot.NewRobot(name,
+			[]gobot.Connection{robot.adaptor},
+			[]gobot.Device{robot.driver},
+			work,
+		)
+		bot.AddRobot(robot)
+		bot.Start()
 	}
 
+	return nil
+}
+
+func work() {
 	// TODO: see which is registered, start only one
 	robot.zombieFn(robot)
-
-	return nil
 }
