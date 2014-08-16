@@ -62,15 +62,15 @@ func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
 	// Switch players for now, better math will be implemented later.
 	if p2.Role == Zombie {
 		if winner {
-			p1.Role == Zombie
+			p1.Role = Zombie
 		} else {
-			p2.Role == Human
+			p2.Role = Human
 		}
 	} else {
 		if winner {
-			p2.Role == Zombie
+			p2.Role = Zombie
 		} else {
-			p1.Role == Human
+			p1.Role = Human
 		}
 	}
 
