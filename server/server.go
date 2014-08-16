@@ -43,7 +43,18 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, room.Human, net.ParseIP(req.RemoteAddr)))
+	role := room.Human
+	if req.FormValue("role") != "" {
+		switch req.FormValue("role") {
+		case "human":
+		case "zombie":
+			role = room.Zombie
+		default:
+			http.Error(w, fmt.Sprintf("Unknown role type '%s'!", req.FormValue("role")), http.StatusBadRequest)
+		}
+	}
+
+	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, role, net.ParseIP(req.RemoteAddr)))
 }
 
 func collidePlayer(w http.ResponseWriter, req *http.Request) {
