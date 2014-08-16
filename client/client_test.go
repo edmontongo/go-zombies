@@ -11,13 +11,19 @@ import (
 const testURL = "http://localhost:11235"
 
 func TestRegistration(t *testing.T) {
-	c, err := New("Bob", testURL)
+	c, err := New("Bob", testURL, false)
+	assert.NoError(t, err)
+	assert.NotEqual(t, 0, c.id)
+}
+
+func TestZombieRegistration(t *testing.T) {
+	c, err := New("Bob", testURL, true)
 	assert.NoError(t, err)
 	assert.NotEqual(t, 0, c.id)
 }
 
 func TestRegsistrationNoName(t *testing.T) {
-	c, err := New("", testURL)
+	c, err := New("", testURL, false)
 	assert.Error(t, err)
 	assert.Nil(t, c)
 }

@@ -12,9 +12,14 @@ type Client struct {
 	id      room.Id
 }
 
-func New(name, url string) (*Client, error) {
+func New(name, url string, zombie bool) (*Client, error) {
+	request := fmt.Sprintf("%s/register?name=%s", url, name)
+	if zombie {
+		request += "&role=zombie"
+	}
+
 	var register registerResponse
-	if err := getResponse(fmt.Sprintf("%s/register?name=%s", url, name), &register); err != nil {
+	if err := getResponse(request, &register); err != nil {
 		return nil, err
 	}
 
