@@ -3,11 +3,10 @@ package game
 import (
 	"fmt"
 
+	"github.com/edmontongo/go-zombies/client"
 	"github.com/hybridgroup/gobot"
 	"github.com/hybridgroup/gobot/platforms/sphero"
 )
-
-// import "github.com/edmontongo/go-zombies/client"
 
 // Robot handler
 type Robot struct {
@@ -18,6 +17,8 @@ type Robot struct {
 	humanFn  robotFn
 
 	Events chan Event
+
+	client *client.Client
 }
 
 type Event struct{}
@@ -42,6 +43,11 @@ func (r Robot) Walk(speed uint8, heading uint16) {
 
 // Start the game
 func Start(name string, port string) error {
+	c, err := client.New(name, "http://localhost:11235", false)
+	if err != nil {
+		return err
+	}
+	robot.client = c
 	robot.Events = make(chan Event, 10)
 
 	if port == "" {
