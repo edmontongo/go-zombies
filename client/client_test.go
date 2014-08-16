@@ -49,3 +49,17 @@ func TestCollision(t *testing.T) {
 	<-wait
 	assert.Equal(t, aliceRole, bobRole)
 }
+
+// TestNonCollision waits for two collisions to not occur
+func TestNonCollision(t *testing.T) {
+	bob, err := New("Bob", testURL, false)
+	assert.NoError(t, err)
+	alice, err := New("Alice", testURL, true)
+	assert.NoError(t, err)
+
+	bobRole, err := bob.Collide()
+	assert.NoError(t, err, "Unexpected Bob error")
+	aliceRole, err := alice.Collide()
+	assert.NoError(t, err, "Unexpected Alice error")
+	assert.NotEqual(t, aliceRole, bobRole)
+}
