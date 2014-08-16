@@ -81,5 +81,5 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, `{"role": %s}`, r)
+	fmt.Fprintf(w, `{"role": "%s"}`, r)
 }
