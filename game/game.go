@@ -42,6 +42,8 @@ func (r Robot) Walk(speed uint8, heading uint16) {
 
 // Start the game
 func Start(name string, port string) error {
+	robot.Events = make(chan Event, 10)
+
 	if port == "" {
 		fmt.Printf("Welcome %s.\n", name)
 		// robot.driver = &fakeSpheroDriver{}
