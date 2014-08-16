@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/register", registerPlayer)
 	http.HandleFunc("/collision", collidePlayer)
 
+	fmt.Printf("Listening at %s...\n", *addr)
 	panic(http.ListenAndServe(*addr, nil))
 }
 
