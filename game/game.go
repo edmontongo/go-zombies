@@ -47,13 +47,18 @@ func (r Robot) Walk(speed uint8, heading uint16) {
 }
 
 // Start the game
-func Start(name string, port string) error {
+func Start(name string, zombie bool, port string) error {
 	c, err := client.New(name, "http://localhost:11235", false)
 	if err != nil {
 		return err
 	}
 	robot.client = c
 	robot.Events = make(chan Event, 10)
+	if zombie {
+		robot.Role = room.Zombie
+	} else {
+		robot.Role = room.Human
+	}
 
 	if port == "" {
 		fmt.Printf("Welcome %s.\n", name)

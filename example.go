@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"time"
 
@@ -46,11 +47,13 @@ func zombieTicker(zombie game.Robot) {
 	}()
 }
 
+var zombie = flag.Bool("zombie", false, "Runs the example as a zombie")
+
 func main() {
 	game.RegisterZombie(zombieTicker)
 	// game.RegisterHuman(me)
 
-	err := game.Start("bob", port)
+	err := game.Start("bob", *zombie, port)
 	if err != nil {
 		log.Fatal(err)
 	}
