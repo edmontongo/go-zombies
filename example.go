@@ -1,15 +1,33 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/edmontongo/go-zombies/game"
 )
 
-func zombieClock(zombie game.Robot) {
-	c := time.Tick(1000 * time.Millisecond)
+/*
+	Mac:
+	Pair with a Bluetooth device, then specify a port in the form:
+ 		/dev/tty.Sphero-???-AMP-SPP
+ 	where ??? are the colours when pairing (eg. ROG).
+
+ 	Windows:
+ 	Pair a Bluetooth device and look up the COM port, use the form:
+ 		COM2
+
+	Linux:
+	Use rfcomm ... and then specify the port in the form:
+		/dev/rfcomm0
+
+	Sphero documentation:
+	http://gobot.io/documentation/platforms/sphero/#HowToConnect
+*/
+var port = "/dev/tty.Sphero-WOO-AMP-SPP"
+
+func zombieTicker(zombie game.Robot) {
+	c := time.Tick(1 * time.Second)
 	go func() {
 		a := 0
 		for {
@@ -22,25 +40,18 @@ func zombieClock(zombie game.Robot) {
 				if !ok {
 					return
 				}
-				fmt.Printf("Event %v\n.", event)
+				log.Printf("Event %v\n.", event)
 			}
 		}
 	}()
 }
 
 func main() {
-	game.RegisterZombie(zombieClock)
+	game.RegisterZombie(zombieTicker)
 	// game.RegisterHuman(me)
 
-	// Mac:
-	// /dev/tty.Sphero-WOO-AMP-SPP
-	// Windows:
-	// Linux:
-	err := game.Start("bob", "/dev/tty.Sphero-WOO-AMP-SPP")
+	err := game.Start("bob", port)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// reader := bufio.NewReader(os.Stdin)
-	// reader.ReadString('\n')
 }
