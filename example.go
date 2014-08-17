@@ -11,7 +11,7 @@ import (
 /*
 	Mac:
 	Pair with a Bluetooth device, then specify a port in the form:
- 		/dev/tty.Sphero-???-AMP-SPP
+ 		/dev/tty.Sphero-???-RN-SPP
  	where ??? are the colours when pairing (eg. ROG).
 
  	Windows:
@@ -25,35 +25,39 @@ import (
 	Sphero documentation:
 	http://gobot.io/documentation/platforms/sphero/#HowToConnect
 */
-var port = "/dev/tty.Sphero-WOO-AMP-SPP"
+var port = flag.String("port", "/dev/tty.Sphero-OBY-RN-SPP", "Port to the Sphero")
+
+// true to start as a zombie
+var zombie = flag.Bool("zombie", false, "Runs the example as a zombie")
 
 func zombieTicker(zombie game.Robot) {
 	c := time.Tick(1 * time.Second)
 	go func() {
-		a := 0
+		heading := 0
 		for {
 			select {
 			case <-c:
-				// do stuff
-				zombie.Walk(0, uint16(a%360))
-				a += 6
+				zombie.Walk(10, heading)
+				heading += 6
 			case event, ok := <-zombie.Events:
 				if !ok {
 					return
 				}
 				log.Printf("Event %v\n.", event)
+				heading += 180
+				zombie.Walk(10, heading)
 			}
 		}
 	}()
 }
 
-var zombie = flag.Bool("zombie", false, "Runs the example as a zombie")
-
 func main() {
+	flag.Parse()
+
 	game.RegisterZombie(zombieTicker)
 	// game.RegisterHuman(me)
 
-	err := game.Start("bob", *zombie, port)
+	err := game.Start("bob", *zombie, *port)
 	if err != nil {
 		log.Fatal(err)
 	}
