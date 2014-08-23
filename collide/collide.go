@@ -78,6 +78,7 @@ func main() {
 	flag.Parse()
 
 	game.RegisterHuman(humanRoller)
+	game.RegisterZombie(humanRoller)
 
 	err := game.Start("bob", *zombie, *port)
 	if err != nil {
