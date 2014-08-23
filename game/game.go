@@ -6,8 +6,8 @@ import (
 
 	"github.com/edmontongo/go-zombies/client"
 	"github.com/edmontongo/go-zombies/server/room"
-	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot/platforms/sphero"
+	"github.com/edmontongo/gobot"
+	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
 // Robot handler
@@ -84,6 +84,8 @@ func Start(name string, zombie bool, port string) error {
 }
 
 func work() {
+	robot.driver.ConfigureCollisionDetectionRaw(0x10, 0x50, 0x10, 0x50, 0x60)
+
 	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
 		onCollission(data)

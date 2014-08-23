@@ -3,7 +3,7 @@ package game
 import (
 	"fmt"
 
-	"github.com/hybridgroup/gobot"
+	"github.com/edmontongo/gobot"
 )
 
 type driver interface {
@@ -13,6 +13,7 @@ type driver interface {
 	// Halt() bool
 	SetBackLED(level uint8)
 	SetRGB(r uint8, g uint8, b uint8)
+	ConfigureCollisionDetectionRaw(xThreshold, xSpeed, yThreshold, ySpeed, deadTime uint8)
 }
 
 type fakeSpheroDriver struct{}
