@@ -62,7 +62,7 @@ func humanRoller(human game.Robot) {
 				var xThreshold, xSpeed, yThreshold, ySpeed uint8
 
 				fmt.Sscanf(line[2:], "%d %d %d %d", &xThreshold, &xSpeed, &yThreshold, &ySpeed)
-				human.Driver.ConfigureCollisionDetectionRaw(xThreshold, xSpeed, yThreshold, ySpeed, 0)
+				human.Driver.ConfigureCollisionDetectionRaw(xThreshold, xSpeed, yThreshold, ySpeed, 25)
 				log.Println("Set collision detection", xThreshold, xSpeed, yThreshold, ySpeed)
 			}
 
