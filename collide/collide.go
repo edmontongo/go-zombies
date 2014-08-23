@@ -44,6 +44,19 @@ func humanRoller(human game.Robot) {
 					log.Printf("Event %v\n.", event)
 					human.Walk(0, heading)
 				}
+
+				// now clear the event channel
+				for {
+					select {
+					case event, ok := <-human.Events:
+						if !ok {
+							return
+						}
+						log.Printf("Event %v\n.", event)
+					default:
+						break
+					}
+				}
 			case 'c':
 				var xThreshold, xSpeed, yThreshold, ySpeed uint8
 
