@@ -19,6 +19,7 @@ type Robot struct {
 	humanFn  robotFn
 
 	Events chan Event
+	Died   chan int
 
 	client *client.Client
 
@@ -29,7 +30,13 @@ type Robot struct {
 type Event struct{}
 type robotFn func(Robot)
 
-var robot Robot
+var robot = Robot{
+	Events: make(chan Event, 10),
+	Died:   make(chan int, 1),
+
+	zombieFn: defaultZombie,
+	humanFn:  defaultHuman,
+}
 
 // RegisterHuman adds your brains to the game.
 func RegisterHuman(fn robotFn) {
@@ -54,7 +61,7 @@ func Start(name string, zombie bool, port string) error {
 		return err
 	}
 	robot.client = c
-	robot.Events = make(chan Event, 10)
+
 	if zombie {
 		robot.Role = room.Zombie
 	} else {
@@ -116,12 +123,24 @@ func onCollission(data interface{}) {
 	} else {
 		robot.driver.SetRGB(0, 0, 255)
 	}
+	if robot.Role != role {
+		robot.Died <- 1
+		robot.Died = make(chan int, 1) // make a new channel for the new controlling function
+		if role == room.Zombie {
+			go robot.zombieFn(robot)
+		} else {
+			go robot.humanFn(robot)
+		}
+	}
 	robot.Role = role
 	robot.Events <- Event{}
 }
 
 func callUserCode() {
-	// TODO: fall back to default zombie/human routine if not registered
 	// TODO: handle switching roles and all that
-	robot.zombieFn(robot)
+	if robot.Role == room.Zombie {
+		robot.zombieFn(robot)
+	} else {
+		robot.humanFn(robot)
+	}
 }
