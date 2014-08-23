@@ -19,7 +19,6 @@ type Robot struct {
 	humanFn  robotFn
 
 	Events chan Event
-	Died   chan int
 
 	client *client.Client
 
@@ -32,7 +31,6 @@ type robotFn func(Robot)
 
 var robot = Robot{
 	Events: make(chan Event, 10),
-	Died:   make(chan int, 1),
 
 	zombieFn: defaultZombie,
 	humanFn:  defaultHuman,
@@ -97,12 +95,13 @@ func work() {
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
 		onCollission(data)
 	})
-	callUserCode()
+	robot.setColor(robot.Role)
+	lauchPlayerCode()
 }
 
 func fakeWork() {
 	// TODO: random events?
-	callUserCode()
+	lauchPlayerCode()
 }
 
 func onCollission(data interface{}) {
@@ -118,29 +117,33 @@ func onCollission(data interface{}) {
 		log.Printf("Unexpected error during collision: %s", err)
 		return
 	}
+
+	robot.setColor(role)
+	robot.Events <- Event{}
+
+	if robot.Role != role {
+		// restart the event loop
+		close(robot.Events)
+		robot.Events = make(chan Event, 10)
+		robot.Role = role
+		lauchPlayerCode()
+	}
+}
+
+func lauchPlayerCode() {
+	// make new channels for the new controlling function
+
+	if robot.Role == room.Zombie {
+		go robot.zombieFn(robot)
+	} else {
+		go robot.humanFn(robot)
+	}
+}
+
+func (r *Robot) setColor(role room.Role) {
 	if role == room.Zombie {
 		robot.driver.SetRGB(255, 0, 0)
 	} else {
 		robot.driver.SetRGB(0, 0, 255)
-	}
-	if robot.Role != role {
-		robot.Died <- 1
-		robot.Died = make(chan int, 1) // make a new channel for the new controlling function
-		if role == room.Zombie {
-			go robot.zombieFn(robot)
-		} else {
-			go robot.humanFn(robot)
-		}
-	}
-	robot.Role = role
-	robot.Events <- Event{}
-}
-
-func callUserCode() {
-	// TODO: handle switching roles and all that
-	if robot.Role == room.Zombie {
-		robot.zombieFn(robot)
-	} else {
-		robot.humanFn(robot)
 	}
 }
