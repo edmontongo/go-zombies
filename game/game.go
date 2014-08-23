@@ -27,6 +27,7 @@ type Robot struct {
 	Role room.Role
 }
 
+// Event is a game event, like a collision.
 type Event struct{}
 type robotFn func(Robot)
 
@@ -91,6 +92,7 @@ func Start(name string, zombie bool, port string) error {
 }
 
 func work() {
+	// threshold at speed of 0, threshold at maximum speed
 	robot.driver.ConfigureCollisionDetectionRaw(0x40, 0x40, 0x50, 0x50, 0x60)
 
 	// TODO: only if not a fakeSphero
