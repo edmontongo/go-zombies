@@ -95,7 +95,8 @@ func work() {
 
 	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
-		onCollission(data)
+		collision, _ := data.(sphero.Collision)
+		onCollission(collision)
 	})
 	robot.setColor(robot.Role)
 	lauchPlayerCode()
@@ -106,13 +107,8 @@ func fakeWork() {
 	lauchPlayerCode()
 }
 
-func onCollission(data interface{}) {
-	collision, ok := data.(sphero.Collision)
-	if ok {
-		fmt.Printf("Collision Detected! %+v\n", collision)
-	} else {
-		fmt.Printf("Collision Detected (but data)! %+v\n", data)
-	}
+func onCollission(collision sphero.Collision) {
+	fmt.Printf("Collision Detected! %+v\n", collision)
 	// Y Axis runs forwards/backwards (head on collisions)
 	// positive values are the front (Y) & right (X)
 	role, err := robot.client.Collide()
