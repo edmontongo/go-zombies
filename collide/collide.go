@@ -26,23 +26,32 @@ func humanRoller(human game.Robot) {
 				log.Fatal(err.Error())
 			}
 
-			var speed uint8
-			var heading int
-			fmt.Sscanf(line, "%d %d", &speed, &heading)
-			human.Walk(speed, heading)
-
-			c := time.After(time.Second)
-			select {
-			case <-c:
-				human.Walk(0, heading)
-				log.Println("Timedout")
-			case event, ok := <-human.Events:
-				if !ok {
-					return
+			switch line[0] {
+			case 's':
+				var speed uint8
+				var heading int
+				fmt.Sscanf(line[2:], "%d %d", &speed, &heading)
+				human.Walk(speed, heading)
+				c := time.After(5 * time.Second)
+				select {
+				case <-c:
+					human.Walk(0, heading)
+					log.Println("Timedout")
+				case event, ok := <-human.Events:
+					if !ok {
+						return
+					}
+					log.Printf("Event %v\n.", event)
+					human.Walk(0, heading)
 				}
-				log.Printf("Event %v\n.", event)
-				human.Walk(0, heading)
+			case 'c':
+				var xThreshold, xSpeed, yThreshold, ySpeed uint8
+
+				fmt.Sscanf(line[2:], "%d %d", &xThreshold, &xSpeed, &yThreshold, &ySpeed)
+				human.Driver.ConfigureCollisionDetectionRaw(xThreshold, xSpeed, yThreshold, ySpeed, 0)
+				log.Println("Set collision detection", xThreshold, xSpeed, yThreshold, ySpeed)
 			}
+
 		}
 	}()
 }

@@ -14,6 +14,7 @@ import (
 type Robot struct {
 	adaptor *sphero.SpheroAdaptor
 	driver  driver
+	Driver  driver
 
 	zombieFn robotFn
 	humanFn  robotFn
@@ -75,6 +76,7 @@ func Start(name string, zombie bool, port string) error {
 		bot := gobot.NewGobot()
 		robot.adaptor = sphero.NewSpheroAdaptor(name, port)
 		robot.driver = sphero.NewSpheroDriver(robot.adaptor, name)
+		robot.Driver = robot.driver
 
 		sphero := gobot.NewRobot(name,
 			[]gobot.Connection{robot.adaptor},
