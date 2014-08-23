@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/edmontongo/go-zombies/client"
 	"github.com/edmontongo/go-zombies/server/room"
@@ -114,23 +113,7 @@ func onCollission(data interface{}) {
 	} else {
 		fmt.Printf("Collision Detected (but data)! %+v\n", data)
 	}
-	// Y Axis runs forwards/backwards (head on collisions)
-	role, err := robot.client.Collide()
-	if err != nil {
-		log.Printf("Unexpected error during collision: %s", err)
-		return
-	}
-
-	robot.setColor(role)
 	robot.Events <- Event{}
-
-	if robot.Role != role {
-		// restart the event loop
-		close(robot.Events)
-		robot.Events = make(chan Event, 10)
-		robot.Role = role
-		lauchPlayerCode()
-	}
 }
 
 func lauchPlayerCode() {
