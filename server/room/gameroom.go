@@ -58,7 +58,8 @@ func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
 		return p1.Role, p2.Role
 	}
 
-	winner := rand.Float32() > 0.70
+	rand.Seed(time.Now().UnixNano())
+	winner := rand.Float32() > 0.30
 	// Switch players for now, better math will be implemented later.
 	if p2.Role == Zombie {
 		if winner {
