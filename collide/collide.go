@@ -28,6 +28,7 @@ func humanRoller(human game.Robot) {
 
 			switch line[0] {
 			case 's':
+				clear(human.Events)
 				var speed uint8
 				var heading int
 				fmt.Sscanf(line[2:], "%d %d", &speed, &heading)
@@ -45,19 +46,8 @@ func humanRoller(human game.Robot) {
 					human.Walk(0, heading)
 				}
 
-				// now clear the event channel
-			loop:
-				for {
-					select {
-					case event, ok := <-human.Events:
-						if !ok {
-							return
-						}
-						log.Printf("Event %v\n.", event)
-					default:
-						break loop
-					}
-				}
+				clear(human.Events)
+
 			case 'c':
 				var xThreshold, xSpeed, yThreshold, ySpeed uint8
 
@@ -68,6 +58,20 @@ func humanRoller(human game.Robot) {
 
 		}
 	}()
+}
+
+func clear(c chan game.Event) {
+	for {
+		select {
+		case event, ok := <-c:
+			if !ok {
+				return
+			}
+			log.Printf("Event %v\n.", event)
+		default:
+			return
+		}
+	}
 }
 
 func main() {
