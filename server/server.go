@@ -76,11 +76,11 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r, err := sim.Collision(id)
+	r, hit, err := sim.Collision(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	fmt.Fprintf(w, `{"role": "%s"}`, r)
+	fmt.Fprintf(w, `{"role": "%s", "hit": "%s"}`, r, hit)
 }

@@ -78,17 +78,16 @@ func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
 }
 
 /// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
-func (r *Room) Collision(id Id) (Role, error) {
+func (r *Room) Collision(id Id) (newRole, hit Role, err error) {
 	p, err := r.player(id)
 	if err != nil {
-		return p.Role, err
+		return p.Role, Wall, err
 	}
 
 	c := make(chan Role)
 	r.collisionQueue <- queuedCollision{p, c}
-	<-c
 
-	return p.Role, nil
+	return p.Role, <-c, nil
 }
 
 func (r *Room) collisionManager(c <-chan queuedCollision) {
@@ -97,10 +96,11 @@ func (r *Room) collisionManager(c <-chan queuedCollision) {
 		select {
 		case p2 := <-c:
 			r.collide(p1.player, p2.player)
-			p2.response <- p2.Role
+			p2.response <- p1.Role
+			p1.response <- p2.Role
 		case _ = <-t:
+			p1.response <- Wall
 		}
-		p1.response <- p1.Role
 	}
 }
 func (r *Room) player(id Id) (*player, error) {

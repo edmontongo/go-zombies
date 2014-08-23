@@ -12,6 +12,7 @@ const (
 	Unknown = Role(iota)
 	Zombie
 	Human
+	Wall
 	lastRole
 )
 
@@ -19,6 +20,7 @@ var roleStrings = []string{
 	"Unknown",
 	"Zombie",
 	"Human",
+	"Wall",
 }
 
 func (r Role) String() string {

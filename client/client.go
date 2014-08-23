@@ -3,6 +3,7 @@ package client
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/edmontongo/go-zombies/server/room"
 )
@@ -38,6 +39,8 @@ func (c *Client) Collide() (room.Role, error) {
 	if err := getResponse(request, &collision); err != nil {
 		return room.Unknown, err
 	}
+
+	log.Println("Hit a", collision.Hit)
 
 	return room.ResolveRole(collision.Role), nil
 }

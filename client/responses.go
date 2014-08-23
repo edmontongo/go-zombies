@@ -12,6 +12,7 @@ type registerResponse struct {
 
 type collisionResponse struct {
 	Role string
+	Hit  string
 }
 
 func getResponse(url string, response interface{}) error {
