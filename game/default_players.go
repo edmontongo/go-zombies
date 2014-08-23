@@ -4,12 +4,26 @@ import "log"
 
 func defaultHuman(robot Robot) {
 	log.Println("I'm a human")
-	<-robot.Died
+
+	for {
+		_, ok := <-robot.Events
+		if !ok {
+			break
+		}
+	}
+
 	log.Println("Human death!")
 }
 
 func defaultZombie(robot Robot) {
 	log.Println("I'm a zombie!")
-	<-robot.Died
+
+	for {
+		_, ok := <-robot.Events
+		if !ok {
+			break
+		}
+	}
+
 	log.Println("Zombie death!")
 }
