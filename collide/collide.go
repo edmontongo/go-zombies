@@ -46,6 +46,7 @@ func humanRoller(human game.Robot) {
 				}
 
 				// now clear the event channel
+			loop:
 				for {
 					select {
 					case event, ok := <-human.Events:
@@ -54,7 +55,7 @@ func humanRoller(human game.Robot) {
 						}
 						log.Printf("Event %v\n.", event)
 					default:
-						break
+						break loop
 					}
 				}
 			case 'c':
