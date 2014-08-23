@@ -84,7 +84,7 @@ func Start(name string, zombie bool, port string) error {
 }
 
 func work() {
-	robot.driver.ConfigureCollisionDetectionRaw(0x10, 0x50, 0x10, 0x50, 0x60)
+	robot.driver.ConfigureCollisionDetectionRaw(0x40, 0x40, 0x50, 0x50, 0x60)
 
 	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
@@ -99,7 +99,13 @@ func fakeWork() {
 }
 
 func onCollission(data interface{}) {
-	fmt.Printf("Collision Detected! %+v\n", data)
+	collision, ok := data.(sphero.Collision)
+	if ok {
+		fmt.Printf("Collision Detected! %+v\n", collision)
+	} else {
+		fmt.Printf("Collision Detected (but data)! %+v\n", data)
+	}
+	// Y Axis runs forwards/backwards (head on collisions)
 	role, err := robot.client.Collide()
 	if err != nil {
 		log.Printf("Unexpected error during collision: %s", err)
