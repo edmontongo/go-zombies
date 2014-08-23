@@ -114,6 +114,7 @@ func onCollission(data interface{}) {
 		fmt.Printf("Collision Detected (but data)! %+v\n", data)
 	}
 	// Y Axis runs forwards/backwards (head on collisions)
+	// positive values are the front (Y) & right (X)
 	role, err := robot.client.Collide()
 	if err != nil {
 		log.Printf("Unexpected error during collision: %s", err)
