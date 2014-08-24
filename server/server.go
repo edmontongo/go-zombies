@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 
@@ -58,7 +59,10 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, role, net.ParseIP(req.RemoteAddr)))
+	id := sim.AddPlayer(name, role, net.ParseIP(req.RemoteAddr))
+
+	log.Printf("Player '%s' from %v given id %d as %s", name, req.RemoteAddr, id, role)
+	fmt.Fprintf(w, `{"playerId": %d}`, id)
 }
 
 func collidePlayer(w http.ResponseWriter, req *http.Request) {
@@ -80,6 +84,7 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
 		}
+		log.Printf("Collision from %s: %v", name, c)
 	}
 
 	id, err := room.IdFromString(name)
