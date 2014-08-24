@@ -52,6 +52,10 @@ func (r Robot) Walk(speed uint8, heading int) {
 	r.driver.Roll(speed, uint16((heading+720)%360))
 }
 
+func (r Robot) SetReferenceHeading(heading int) {
+	r.driver.SetHeading(uint16((heading + 720) % 360))
+}
+
 // Start the game
 func Start(name string, zombie bool, device string, server string) error {
 	moreWork := func() {

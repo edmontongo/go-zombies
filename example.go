@@ -33,6 +33,7 @@ var server = flag.String("server", "http://localhost:11235", "Server address to 
 var zombie = flag.Bool("zombie", false, "Runs the example as a zombie.")
 
 func zombieTicker(zombie game.Robot) {
+	zombie.SetReferenceHeading(0)
 	c := time.Tick(1 * time.Second)
 	go func() {
 		heading := 0
