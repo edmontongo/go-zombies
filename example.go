@@ -25,10 +25,12 @@ import (
 	Sphero documentation:
 	http://gobot.io/documentation/platforms/sphero/#HowToConnect
 */
-var port = flag.String("port", "/dev/tty.Sphero-OBY-RN-SPP", "Port to the Sphero")
+var device = flag.String("device", "/dev/tty.Sphero-WRW-RN-SPP", "Device for the Sphero.")
+
+var server = flag.String("server", "http://localhost:11235", "Server address to connect to.")
 
 // true to start as a zombie
-var zombie = flag.Bool("zombie", false, "Runs the example as a zombie")
+var zombie = flag.Bool("zombie", false, "Runs the example as a zombie.")
 
 func zombieTicker(zombie game.Robot) {
 	c := time.Tick(1 * time.Second)
@@ -37,15 +39,15 @@ func zombieTicker(zombie game.Robot) {
 		for {
 			select {
 			case <-c:
-				zombie.Walk(10, heading)
+				zombie.Walk(100, heading)
 				heading += 6
 			case event, ok := <-zombie.Events:
 				if !ok {
 					return
 				}
-				log.Printf("Event %v\n.", event)
+				log.Printf("Event %+v\n.", event)
 				heading += 180
-				zombie.Walk(10, heading)
+				zombie.Walk(100, heading)
 			}
 		}
 	}()
@@ -55,9 +57,9 @@ func main() {
 	flag.Parse()
 
 	game.RegisterZombie(zombieTicker)
-	// game.RegisterHuman(me)
+	game.RegisterHuman(zombieTicker)
 
-	err := game.Start("bob", *zombie, *port)
+	err := game.Start("bob", *zombie, *device, *server)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -53,46 +53,44 @@ func (r Robot) Walk(speed uint8, heading int) {
 }
 
 // Start the game
-func Start(name string, zombie bool, port string) error {
-	// TODO: pass in server IP
-	c, err := client.New(name, "http://localhost:11235", zombie)
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-	robot.client = c
+func Start(name string, zombie bool, device string, server string) error {
+	moreWork := func() {
+		c, err := client.New(name, server, zombie)
+		if err != nil {
+			log.Fatal(err)
+		}
+		robot.client = c
 
-	if zombie {
-		robot.Role = room.Zombie
-	} else {
-		robot.Role = room.Human
+		if zombie {
+			robot.Role = room.Zombie
+		} else {
+			robot.Role = room.Human
+		}
+
+		work()
 	}
 
-	if port == "" {
-		fmt.Printf("Welcome %s.\n", name)
-		// robot.driver = &fakeSpheroDriver{}
-		fakeWork()
-	} else {
-		// TODO: err handling
-		bot := gobot.NewGobot()
-		robot.adaptor = sphero.NewSpheroAdaptor(name, port)
-		robot.driver = sphero.NewSpheroDriver(robot.adaptor, name)
+	// TODO: err handling
+	bot := gobot.NewGobot()
+	robot.adaptor = sphero.NewSpheroAdaptor(name, device)
+	robot.driver = sphero.NewSpheroDriver(robot.adaptor, name)
 
-		sphero := gobot.NewRobot(name,
-			[]gobot.Connection{robot.adaptor},
-			[]gobot.Device{robot.driver},
-			work,
-		)
-		bot.AddRobot(sphero)
-		bot.Start()
-	}
+	sphero := gobot.NewRobot(name,
+		[]gobot.Connection{robot.adaptor},
+		[]gobot.Device{robot.driver},
+		moreWork,
+	)
+	bot.AddRobot(sphero)
+
+	bot.Start()
+	robot.client.Close()
 
 	return nil
 }
 
 func work() {
 	// threshold at speed of 0, threshold at maximum speed
-	robot.driver.ConfigureCollisionDetectionRaw(0x40, 0x40, 0x50, 0x50, 0x60)
+	robot.driver.ConfigureCollisionDetectionRaw(20, 0, 20, 0, 50)
 	robot.driver.SetBackLED(0xff)
 
 	// TODO: only if not a fakeSphero
@@ -115,7 +113,7 @@ func onCollission(collision sphero.Collision) {
 	// positive values are the front (Y) & right (X)
 	role, err := robot.client.Collide(collision)
 	if err != nil {
-		log.Printf("Unexpected error during collision: %s", err)
+		log.Printf("Unexpected error sending collision to server: %s", err)
 		return
 	}
 
