@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/edmontongo/go-zombies/client"
@@ -13,7 +12,7 @@ import (
 // Robot handler
 type Robot struct {
 	adaptor *sphero.SpheroAdaptor
-	driver  driver
+	driver  *sphero.SpheroDriver
 
 	zombieFn robotFn
 	humanFn  robotFn
@@ -52,6 +51,7 @@ func (r Robot) Walk(speed uint8, heading int) {
 	r.driver.Roll(speed, uint16((heading+720)%360))
 }
 
+// SetReferenceHeading calibrates a heading (0-359).
 func (r Robot) SetReferenceHeading(heading int) {
 	r.driver.SetHeading(uint16((heading + 720) % 360))
 }
@@ -106,13 +106,8 @@ func work() {
 	lauchPlayerCode()
 }
 
-func fakeWork() {
-	// TODO: random events?
-	lauchPlayerCode()
-}
-
 func onCollission(collision sphero.Collision) {
-	fmt.Printf("Collision Detected! %+v\n", collision)
+	log.Printf("Collision Detected! %+v\n", collision)
 	// Y Axis runs forwards/backwards (head on collisions)
 	// positive values are the front (Y) & right (X)
 	role, err := robot.client.Collide(collision)
