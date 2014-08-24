@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/status", roomStatus)
 	http.HandleFunc("/register", registerPlayer)
 	http.HandleFunc("/collision", collidePlayer)
+	http.HandleFunc("/deregister", deregisterPlayer)
 
 	fmt.Printf("Listening at %s...\n", *addr)
 	panic(http.ListenAndServe(*addr, nil))
@@ -56,6 +57,25 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, `{"playerId": %d}`, sim.AddPlayer(name, role, net.ParseIP(req.RemoteAddr)))
+}
+
+func deregisterPlayer(w http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	name := req.FormValue("id")
+	if name == "" {
+		http.Error(w, `{"error": "No id provided!"}`, http.StatusBadRequest)
+		return
+	}
+	id, err := room.IdFromString(name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	sim.RemovePlayer(id)
 }
 
 func collidePlayer(w http.ResponseWriter, req *http.Request) {

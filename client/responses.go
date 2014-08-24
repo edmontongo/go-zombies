@@ -10,6 +10,9 @@ type registerResponse struct {
 	PlayerId int
 }
 
+type deregisterResponse struct {
+}
+
 type collisionResponse struct {
 	Role string
 	Hit  string

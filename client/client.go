@@ -39,8 +39,13 @@ func (c *Client) Collide() (room.Role, error) {
 	if err := getResponse(request, &collision); err != nil {
 		return room.Unknown, err
 	}
-
 	log.Println("Hit a", collision.Hit)
 
 	return room.ResolveRole(collision.Role), nil
+}
+
+func (c *Client) Close() error {
+	request := fmt.Sprintf("%s/deregister?id=%d", c.roomUrl, c.id)
+	var response deregisterResponse
+	return getResponse(request, &response)
 }

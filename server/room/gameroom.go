@@ -6,6 +6,7 @@ package room
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"time"
@@ -123,6 +124,12 @@ func (r *Room) AddPlayer(name string, role Role, ip net.IP) Id {
 	}
 
 	r.players[id] = &player{name, id, role, ip, time.Now()}
-
+	log.Printf("AddPlayer %v\n", id)
 	return id
+}
+
+// RemovePlayer removes a player from the room.
+func (r *Room) RemovePlayer(id Id) {
+	log.Printf("RemovePlayer %v\n", id)
+	delete(r.players, id)
 }

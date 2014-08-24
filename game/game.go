@@ -59,6 +59,7 @@ func Start(name string, zombie bool, port string) error {
 	if err != nil {
 		return err
 	}
+	defer c.Close()
 	robot.client = c
 
 	if zombie {
