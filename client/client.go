@@ -2,10 +2,13 @@
 package client
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 
 	"github.com/edmontongo/go-zombies/server/room"
+	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
 type Client struct {
@@ -32,8 +35,12 @@ func New(name, url string, zombie bool) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Collide() (room.Role, error) {
-	request := fmt.Sprintf("%s/collision?id=%d", c.roomUrl, c.id)
+func (c *Client) Collide(data sphero.Collision) (room.Role, error) {
+	json, err := wrap(data)
+	if err != nil {
+		return room.Unknown, err
+	}
+	request := fmt.Sprintf("%s/collision?id=%d&data=%s", c.roomUrl, c.id, json)
 	var collision collisionResponse
 
 	if err := getResponse(request, &collision); err != nil {
@@ -43,4 +50,12 @@ func (c *Client) Collide() (room.Role, error) {
 	log.Println("Hit a", collision.Hit)
 
 	return room.ResolveRole(collision.Role), nil
+}
+
+func wrap(i interface{}) (string, error) {
+	b, err := json.Marshal(i)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
 }

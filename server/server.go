@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
 	"net/http"
 
 	"github.com/edmontongo/go-zombies/server/room"
+	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
 var addr = flag.String("addr", ":11235", "Address to bind http server to")
@@ -70,6 +73,15 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	var c sphero.Collision
+	data := req.FormValue("data")
+	if data != "" {
+		err := unwrap(data, &c)
+		if err != nil {
+			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
+		}
+	}
+
 	id, err := room.IdFromString(name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -83,4 +95,12 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, `{"role": "%s", "hit": "%s"}`, r, hit)
+}
+
+func unwrap(s string, i interface{}) error {
+	b, err := base64.URLEncoding.DecodeString(s)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, i)
 }

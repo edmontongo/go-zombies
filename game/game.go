@@ -112,7 +112,7 @@ func onCollission(collision sphero.Collision) {
 	fmt.Printf("Collision Detected! %+v\n", collision)
 	// Y Axis runs forwards/backwards (head on collisions)
 	// positive values are the front (Y) & right (X)
-	role, err := robot.client.Collide()
+	role, err := robot.client.Collide(collision)
 	if err != nil {
 		log.Printf("Unexpected error during collision: %s", err)
 		return
