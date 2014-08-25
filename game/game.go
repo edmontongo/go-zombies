@@ -24,7 +24,7 @@ type Robot struct {
 	// Track our game state
 	Role room.Role
 
-	humanColor Color
+	humanColor *Color
 	// mHumanColor sync.RWMutex
 }
 
@@ -47,7 +47,7 @@ var robot = Robot{
 
 	zombieFn:   defaultZombie,
 	humanFn:    defaultHuman,
-	humanColor: Color{0, 0, 255},
+	humanColor: &Color{0, 0, 255},
 }
 
 // RegisterHuman adds your brains to the game.

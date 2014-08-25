@@ -49,6 +49,8 @@ func main() {
 
 // clock rotates 6 degrees every second
 func clock(robot game.Robot) {
+	robot.SetHumanColor(0, 255, 0)
+
 	tick := time.Tick(1 * time.Second)
 	go func() {
 		heading := 0 // 0-359 degrees
