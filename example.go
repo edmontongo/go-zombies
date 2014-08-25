@@ -19,7 +19,8 @@ import (
  		COM2
 
 	Linux:
-	Use rfcomm ... and then specify the device in the form:
+	Use 'hcitool dev' to find your bluetooth device, then 'hcitool scan' to find your sphero's id.
+	Then pair with 'sudo rfcomm bind [dev] [id]' which creates a port in the form:
 		/dev/rfcomm0
 
 	Sphero documentation:
