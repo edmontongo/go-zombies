@@ -18,27 +18,23 @@ import (
 type Collision struct {
 	Id         Id
 	ServerTime time.Time
-	player     *player
-	Collision  sphero.Collision
+	*player
+	Collision sphero.Collision
+	response  chan<- Role
 }
 
 func (c Collision) String() string {
 	return fmt.Sprintf("%v: %s was %s to (??) from %+v", c.ServerTime, c.player.name, c.player.Role, c.Collision)
 }
 
-type queuedCollision struct {
-	*player
-	response chan<- Role
-}
-
 type Room struct {
 	players          map[Id]*player
-	collisionQueue   chan<- queuedCollision
+	collisionQueue   chan<- *Collision
 	recentCollisions []*Collision
 }
 
 func New() Room {
-	c := make(chan queuedCollision)
+	c := make(chan *Collision)
 	r := Room{map[Id]*player{}, c, make([]*Collision, 10)}
 	go r.collisionManager(c)
 	return r
@@ -69,29 +65,29 @@ func (r *Room) count(role Role) int {
 }
 
 // Collide accepts two players and determines what there roles are after an interaction.
-func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
-	if p2.Role == p1.Role {
-		return p1.Role, p2.Role
+func (r *Room) collide(c1, c2 *Collision) (r1, r2 Role) {
+	if c2.Role == c1.Role {
+		return c1.Role, c2.Role
 	}
 
 	rand.Seed(time.Now().UnixNano())
 	winner := rand.Float32() > 0.30
 	// Switch players for now, better math will be implemented later.
-	if p2.Role == Zombie {
+	if c2.Role == Zombie {
 		if winner {
-			p1.Role = Zombie
+			c1.Role = Zombie
 		} else {
-			p2.Role = Human
+			c2.Role = Human
 		}
 	} else {
 		if winner {
-			p2.Role = Zombie
+			c2.Role = Zombie
 		} else {
-			p1.Role = Human
+			c1.Role = Human
 		}
 	}
 
-	return p1.Role, p2.Role
+	return c1.Role, c2.Role
 }
 
 /// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
@@ -104,22 +100,23 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 	r.recentCollisions = append(r.recentCollisions[1:], &c)
 
 	result := make(chan Role)
-	r.collisionQueue <- queuedCollision{c.player, result}
+	c.response = result
+	r.collisionQueue <- &c
 
 	return c.player.Role, <-result, nil
 }
 
-func (r *Room) collisionManager(c <-chan queuedCollision) {
-	for p1 := range c {
+func (r *Room) collisionManager(c <-chan *Collision) {
+	for c1 := range c {
 		t := time.After(400 * time.Millisecond)
 		select {
-		case p2 := <-c:
-			oldp1, oldp2 := p1.Role, p2.Role
-			r.collide(p1.player, p2.player)
-			p2.response <- oldp1
-			p1.response <- oldp2
+		case c2 := <-c:
+			oldp1, oldp2 := c1.Role, c2.Role
+			r.collide(c1, c2)
+			c2.response <- oldp1
+			c1.response <- oldp2
 		case _ = <-t:
-			p1.response <- Wall
+			c1.response <- Wall
 		}
 	}
 }
