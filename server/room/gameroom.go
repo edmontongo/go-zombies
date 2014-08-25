@@ -90,7 +90,7 @@ func (r *Room) collide(c1, c2 *Collision) (r1, r2 Role) {
 	return c1.Role, c2.Role
 }
 
-/// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
+// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
 func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 	c.player, err = r.player(c.Id)
 	if err != nil {
@@ -162,7 +162,7 @@ func (p playerList) Len() int           { return len(p) }
 func (p playerList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p playerList) Less(i, j int) bool { return p[i].name < p[j].name }
 
-// returns a sorted list of players
+// Players returns a sorted list of players
 func (r *Room) Players() []*player {
 	list := []*player{}
 	for _, p := range r.players {
