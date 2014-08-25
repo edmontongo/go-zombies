@@ -94,7 +94,7 @@ func (r *Room) Collision(id Id) (newRole, hit Role, err error) {
 
 func (r *Room) collisionManager(c <-chan queuedCollision) {
 	for p1 := range c {
-		t := time.After(time.Second)
+		t := time.After(400 * time.Millisecond)
 		select {
 		case p2 := <-c:
 			r.collide(p1.player, p2.player)
