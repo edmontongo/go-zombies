@@ -10,7 +10,20 @@ import (
 	"math/rand"
 	"net"
 	"time"
+
+	"github.com/edmontongo/gobot/platforms/sphero"
 )
+
+type Collision struct {
+	Id         Id
+	ServerTime time.Time
+	player     *player
+	Collision  sphero.Collision
+}
+
+func (c Collision) String() string {
+	return fmt.Sprintf("%v: %s was %s to (??) from %+v", c.ServerTime, c.player.name, c.player.Role, c.Collision)
+}
 
 type queuedCollision struct {
 	*player
@@ -18,13 +31,14 @@ type queuedCollision struct {
 }
 
 type Room struct {
-	players        map[Id]*player
-	collisionQueue chan<- queuedCollision
+	players          map[Id]*player
+	collisionQueue   chan<- queuedCollision
+	recentCollisions []*Collision
 }
 
 func New() Room {
 	c := make(chan queuedCollision)
-	r := Room{map[Id]*player{}, c}
+	r := Room{map[Id]*player{}, c, make([]*Collision, 10)}
 	go r.collisionManager(c)
 	return r
 }
@@ -80,21 +94,23 @@ func (r *Room) collide(p1, p2 *player) (r1, r2 Role) {
 }
 
 /// Collision checks if the given id was involved in a collision with anyone else. An error is returned if the player wasn't registered to the room.
-func (r *Room) Collision(id Id) (newRole, hit Role, err error) {
-	p, err := r.player(id)
+func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
+	c.player, err = r.player(c.Id)
 	if err != nil {
-		return p.Role, Wall, err
+		return Unknown, Wall, err
 	}
 
-	c := make(chan Role)
-	r.collisionQueue <- queuedCollision{p, c}
+	r.recentCollisions = append(r.recentCollisions[1:], &c)
 
-	return p.Role, <-c, nil
+	result := make(chan Role)
+	r.collisionQueue <- queuedCollision{c.player, result}
+
+	return c.player.Role, <-result, nil
 }
 
 func (r *Room) collisionManager(c <-chan queuedCollision) {
 	for p1 := range c {
-		t := time.After(time.Second)
+		t := time.After(400 * time.Millisecond)
 		select {
 		case p2 := <-c:
 			r.collide(p1.player, p2.player)
@@ -132,4 +148,10 @@ func (r *Room) AddPlayer(name string, role Role, ip net.IP) Id {
 func (r *Room) RemovePlayer(id Id) {
 	log.Printf("RemovePlayer %v\n", id)
 	delete(r.players, id)
+}
+
+func (r *Room) Recent() []*Collision {
+	ret := make([]*Collision, len(r.recentCollisions))
+	copy(ret, r.recentCollisions)
+	return ret
 }

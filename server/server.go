@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/edmontongo/go-zombies/server/room"
-	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
 var addr = flag.String("addr", ":11235", "Address to bind http server to")
@@ -30,11 +31,25 @@ func main() {
 	panic(http.ListenAndServe(*addr, nil))
 }
 
+var reportTemplate = `<html><head><title>Zombie Simulartor Status</title></head>
+<body>
+Humans: {{.Humans}}<br>
+Zombies: {{.Zombies}}<br>
+<br>
+Recent:<br>
+{{range .Recent}}
+{{with .}}{{.}}<br>{{end}}
+{{end}}
+</body></html>
+`
+var statusTemplate = template.Must(template.New("reportTemplate").Parse(reportTemplate))
+
 // roomStatus provides very basic status information
 func roomStatus(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "<html><head><title>Zombie Simulartor Status</title></head><body>\n")
-	fmt.Fprintf(w, "Humans: %d<br>Zombies: %d<br>\n", sim.Humans(), sim.Zombies())
-	fmt.Fprintf(w, "</body></html>\n")
+	err := statusTemplate.Execute(w, &sim)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
 func registerPlayer(w http.ResponseWriter, req *http.Request) {
@@ -91,29 +106,31 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	name := req.FormValue("id")
-	if name == "" {
+	id := req.FormValue("id")
+	if id == "" {
 		http.Error(w, `{"error": "No id provided!"}`, http.StatusBadRequest)
 		return
 	}
 
-	var c sphero.Collision
+	var c room.Collision
 	data := req.FormValue("data")
 	if data != "" {
-		err := unwrap(data, &c)
+		err := unwrap(data, &c.Collision)
 		if err != nil {
 			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
 		}
-		log.Printf("Collision from %s: %v", name, c)
+		log.Printf("Collision from %s: %v", id, c.Collision)
 	}
 
-	id, err := room.IdFromString(name)
+	c.Id, err = room.IdFromString(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	r, hit, err := sim.Collision(id)
+	c.ServerTime = time.Now()
+
+	r, hit, err := sim.Collision(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
