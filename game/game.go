@@ -30,8 +30,8 @@ type Robot struct {
 
 // Event is a game event, like a collision.
 type Event struct {
-	Collision        sphero.Collision
-	WasRole, NewRole room.Role
+	Collision             sphero.Collision
+	WasRole, NewRole, Hit room.Role
 }
 
 type robotFn func(Robot)
@@ -135,14 +135,20 @@ func work() {
 func onCollission(collision sphero.Collision) {
 	// Y Axis runs forwards/backwards (head on collisions)
 	// positive values are the front (Y) & right (X)
-	role, err := robot.client.Collide(collision)
+	role, hitRole, err := robot.client.Collide(collision)
 	if err != nil {
 		log.Printf("Unexpected error sending collision to server: %s", err)
 		return
 	}
 
 	robot.setColor(role)
-	robot.Events <- Event{Collision: collision, WasRole: robot.Role, NewRole: role}
+	event := Event{
+		Collision: collision,
+		WasRole:   robot.Role,
+		NewRole:   role,
+		Hit:       hitRole,
+	}
+	robot.Events <- event
 
 	if robot.Role != role {
 		// restart the event loop

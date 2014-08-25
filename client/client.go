@@ -34,20 +34,19 @@ func New(name, url string, zombie bool) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Collide(data sphero.Collision) (room.Role, error) {
+func (c *Client) Collide(data sphero.Collision) (newRole, hitRole room.Role, err error) {
 	json, err := wrap(data)
 	if err != nil {
-		return room.Unknown, err
+		return room.Unknown, room.Unknown, err
 	}
 	request := fmt.Sprintf("%s/collision?id=%d&data=%s", c.roomUrl, c.id, json)
 	var collision collisionResponse
 
 	if err := getResponse(request, &collision); err != nil {
-		return room.Unknown, err
+		return room.Unknown, room.Unknown, err
 	}
 	// log.Println("Hit a", collision.Hit)
-
-	return room.ResolveRole(collision.Role), nil
+	return room.ResolveRole(collision.Role), room.ResolveRole(collision.Hit), nil
 }
 
 func (c *Client) Close() error {
