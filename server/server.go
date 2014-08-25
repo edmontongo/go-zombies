@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/edmontongo/go-zombies/server/room"
 )
@@ -29,11 +31,25 @@ func main() {
 	panic(http.ListenAndServe(*addr, nil))
 }
 
+var reportTemplate = `<html><head><title>Zombie Simulartor Status</title></head>
+<body>
+Humans: {{.Humans}}<br>
+Zombies: {{.Zombies}}<br>
+<br>
+Recent:<br>
+{{range .Recent}}
+{{with .}}{{.}}<br>{{end}}
+{{end}}
+</body></html>
+`
+var statusTemplate = template.Must(template.New("reportTemplate").Parse(reportTemplate))
+
 // roomStatus provides very basic status information
 func roomStatus(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "<html><head><title>Zombie Simulartor Status</title></head><body>\n")
-	fmt.Fprintf(w, "Humans: %d<br>Zombies: %d<br>\n", sim.Humans(), sim.Zombies())
-	fmt.Fprintf(w, "</body></html>\n")
+	err := statusTemplate.Execute(w, &sim)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
 func registerPlayer(w http.ResponseWriter, req *http.Request) {
@@ -112,7 +128,9 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r, hit, err := sim.Collision(c.Id)
+	c.ServerTime = time.Now()
+
+	r, hit, err := sim.Collision(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
