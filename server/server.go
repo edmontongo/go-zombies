@@ -33,13 +33,17 @@ func main() {
 
 var reportTemplate = `<html><head><title>Zombie Simulartor Status</title></head>
 <body>
-Humans: {{.Humans}}<br>
-Zombies: {{.Zombies}}<br>
+<div id="Stats">Humans: {{.Humans}} Zombies: {{.Zombies}}<div>
 <br>
-Recent:<br>
+<div id="players">Players:<br>
+{{range .Players}}{{.Description}}<br>{{end}}
+</div>
+<br>
+<div id="recent">Recent Collisions:<br>
 {{range .Recent}}
 {{with .}}{{.}}<br>{{end}}
 {{end}}
+</div>
 </body></html>
 `
 var statusTemplate = template.Must(template.New("reportTemplate").Parse(reportTemplate))
