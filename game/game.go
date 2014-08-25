@@ -80,7 +80,7 @@ func (r *Robot) SetHumanColor(red, green, blue uint8) {
 	r.humanColor.Blue = blue
 	// r.mHumanColor.Unlock()
 	r.setColor(r.Role)
-	log.Printf("set: %v\n", r.humanColor)
+	// log.Printf("set: %v\n", r.humanColor)
 }
 
 // Start the game
