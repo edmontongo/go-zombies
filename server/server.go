@@ -116,13 +116,13 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	var c room.Collision
 	c.Id, err = room.IdFromString(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	var c room.Collision
 	data := req.FormValue("data")
 	if data != "" {
 		err := unwrap(data, &c.Collision)
