@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/edmontongo/go-zombies/server/room"
 	"github.com/edmontongo/gobot/platforms/sphero"
@@ -46,7 +45,7 @@ func (c *Client) Collide(data sphero.Collision) (room.Role, error) {
 	if err := getResponse(request, &collision); err != nil {
 		return room.Unknown, err
 	}
-	log.Println("Hit a", collision.Hit)
+	// log.Println("Hit a", collision.Hit)
 
 	return room.ResolveRole(collision.Role), nil
 }

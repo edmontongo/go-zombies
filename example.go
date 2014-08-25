@@ -38,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	game.RegisterHuman(clock)
-	game.RegisterZombie(clock)
+	// game.RegisterZombie(clock)
 
 	err := game.Start("bob", *zombie, *device, *server)
 	if err != nil {
@@ -59,9 +59,15 @@ func clock(robot game.Robot) {
 				heading = (heading + 6) % 360
 			case event, ok := <-robot.Events:
 				if !ok {
+					// Channel closed, I died.
 					return
 				}
+				// Collision
+				// Y Axis runs forwards/backwards (head on collisions)
+				// positive values are the front (Y) & right (X)
 				log.Printf("Event %+v\n.", event)
+
+				// Turn around
 				heading = (heading + 180) % 360
 				robot.Walk(speed, heading)
 			}

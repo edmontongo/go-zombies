@@ -9,7 +9,7 @@ import (
 	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
-// Robot handler
+// Robot that can walk around.
 type Robot struct {
 	adaptor *sphero.SpheroAdaptor
 	driver  *sphero.SpheroDriver
@@ -23,17 +23,31 @@ type Robot struct {
 
 	// Track our game state
 	Role room.Role
+
+	humanColor Color
+	// mHumanColor sync.RWMutex
 }
 
 // Event is a game event, like a collision.
-type Event struct{}
+type Event struct {
+	Collision        sphero.Collision
+	WasRole, NewRole room.Role
+}
+
 type robotFn func(Robot)
 
+// Color (red, green, blue)
+type Color struct {
+	Red, Green, Blue uint8
+}
+
+// one global robot
 var robot = Robot{
 	Events: make(chan Event, 10),
 
-	zombieFn: defaultZombie,
-	humanFn:  defaultHuman,
+	zombieFn:   defaultZombie,
+	humanFn:    defaultHuman,
+	humanColor: Color{0, 0, 255},
 }
 
 // RegisterHuman adds your brains to the game.
@@ -47,13 +61,26 @@ func RegisterZombie(fn robotFn) {
 }
 
 // Walk like a zombie.
-func (r Robot) Walk(speed, heading int) {
-	r.driver.Roll(uint8(speed), uint16((heading+720)%360))
+func (r *Robot) Walk(speed, heading int) {
+	heading = (heading + 720) % 360
+	r.driver.Roll(uint8(speed), uint16(heading))
 }
 
 // SetReferenceHeading calibrates a heading (0-359).
-func (r Robot) SetReferenceHeading(heading int) {
-	r.driver.SetHeading(uint16((heading + 720) % 360))
+func (r *Robot) SetReferenceHeading(heading int) {
+	heading = (heading + 720) % 360
+	r.driver.SetHeading(uint16(heading))
+}
+
+// SetHumanColor sets the red, green, blue color value.
+func (r *Robot) SetHumanColor(red, green, blue uint8) {
+	// r.mHumanColor.Lock()
+	r.humanColor.Red = red
+	r.humanColor.Green = green
+	r.humanColor.Blue = blue
+	// r.mHumanColor.Unlock()
+	r.setColor(r.Role)
+	log.Printf("set: %v\n", r.humanColor)
 }
 
 // Start the game
@@ -93,11 +120,10 @@ func Start(name string, zombie bool, device string, server string) error {
 }
 
 func work() {
-	// threshold at speed of 0, threshold at maximum speed
+	// threshold at speed of 0, add value at maximum speed
 	robot.driver.ConfigureCollisionDetectionRaw(20, 0, 20, 0, 50)
 	robot.driver.SetBackLED(0xff)
 
-	// TODO: only if not a fakeSphero
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
 		collision, _ := data.(sphero.Collision)
 		onCollission(collision)
@@ -107,7 +133,6 @@ func work() {
 }
 
 func onCollission(collision sphero.Collision) {
-	log.Printf("Collision Detected! %+v\n", collision)
 	// Y Axis runs forwards/backwards (head on collisions)
 	// positive values are the front (Y) & right (X)
 	role, err := robot.client.Collide(collision)
@@ -117,7 +142,7 @@ func onCollission(collision sphero.Collision) {
 	}
 
 	robot.setColor(role)
-	robot.Events <- Event{}
+	robot.Events <- Event{Collision: collision, WasRole: robot.Role, NewRole: role}
 
 	if robot.Role != role {
 		// restart the event loop
@@ -142,6 +167,9 @@ func (r *Robot) setColor(role room.Role) {
 	if role == room.Zombie {
 		robot.driver.SetRGB(255, 0, 0)
 	} else {
-		robot.driver.SetRGB(0, 0, 255)
+		// r.mHumanColor.RLock()
+		// log.Println(r.humanColor)
+		robot.driver.SetRGB(r.humanColor.Red, r.humanColor.Green, r.humanColor.Blue)
+		// r.mHumanColor.RUnlock()
 	}
 }
