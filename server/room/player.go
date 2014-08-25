@@ -1,6 +1,7 @@
 package room
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"time"
@@ -53,4 +54,8 @@ type player struct {
 	Role
 	ip     net.IP
 	joined time.Time
+}
+
+func (p player) Description() string {
+	return fmt.Sprintf("%s: %s", p.name, p.Role)
 }

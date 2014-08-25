@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"sort"
 	"time"
 
 	"github.com/edmontongo/gobot/platforms/sphero"
@@ -156,4 +157,20 @@ func (r *Room) Recent() []*Collision {
 	ret := make([]*Collision, len(r.recentCollisions))
 	copy(ret, r.recentCollisions)
 	return ret
+}
+
+type playerList []*player
+
+func (p playerList) Len() int           { return len(p) }
+func (p playerList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p playerList) Less(i, j int) bool { return p[i].name < p[j].name }
+
+// returns a sorted list of players
+func (r *Room) Players() []*player {
+	list := []*player{}
+	for _, p := range r.players {
+		list = append(list, p)
+	}
+	sort.Sort(playerList(list))
+	return list
 }
