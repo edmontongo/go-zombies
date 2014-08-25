@@ -132,6 +132,7 @@ func (r *Room) player(id Id) (*player, error) {
 // AddPlayer returns the unique player id after a player has been registered to the room.
 func (r *Room) AddPlayer(name string, role Role, ip net.IP) Id {
 	id := Id(0)
+	rand.Seed(time.Now().UnixNano())
 	for id == 0 {
 		id = Id(rand.Int())
 		if _, ok := r.players[id]; ok {
