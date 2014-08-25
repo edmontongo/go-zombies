@@ -23,6 +23,18 @@ func (c Collision) Front() bool {
 	return c.Collision.Y > 0 && ((c.Collision.Axis & 0x2) == 0x2)
 }
 
+func (c Collision) Valid() bool {
+	return c.Vulnerable() && c.Attack()
+}
+
+func (c Collision) Attack() bool {
+	return c.Front() && c.Strong() && c.Collision.Speed > 60
+}
+
+func (c Collision) Vulnerable() bool {
+	return c.Collision.Speed < 10 && (c.Collision.XMagnitue+c.Collision.YMagnitude) > 75
+}
+
 func (c Collision) Strong() bool {
 	return c.Collision.YMagnitude > 40
 }
