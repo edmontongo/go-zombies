@@ -47,8 +47,8 @@ func RegisterZombie(fn robotFn) {
 }
 
 // Walk like a zombie.
-func (r Robot) Walk(speed uint8, heading int) {
-	r.driver.Roll(speed, uint16((heading+720)%360))
+func (r Robot) Walk(speed, heading int) {
+	r.driver.Roll(uint8(speed), uint16((heading+720)%360))
 }
 
 // SetReferenceHeading calibrates a heading (0-359).

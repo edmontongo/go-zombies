@@ -10,7 +10,7 @@ import (
 
 /*
 	Mac:
-	Pair with a Bluetooth device, then specify a port in the form:
+	Pair with a Bluetooth device, then specify a device in the form:
  		/dev/tty.Sphero-???-RN-SPP
  	where ??? are the colours when pairing (eg. ROG).
 
@@ -19,49 +19,52 @@ import (
  		COM2
 
 	Linux:
-	Use rfcomm ... and then specify the port in the form:
+	Use rfcomm ... and then specify the device in the form:
 		/dev/rfcomm0
 
 	Sphero documentation:
 	http://gobot.io/documentation/platforms/sphero/#HowToConnect
 */
-var device = flag.String("device", "/dev/tty.Sphero-WRW-RN-SPP", "Device for the Sphero.")
+var device = flag.String("device", "/dev/tty.Sphero-RBG-RN-SPP", "Device for the Sphero.")
 
+// game server address
 var server = flag.String("server", "http://localhost:11235", "Server address to connect to.")
 
-// true to start as a zombie
+// start as a zombie (defaults to human)
 var zombie = flag.Bool("zombie", false, "Runs the example as a zombie.")
 
-func zombieTicker(zombie game.Robot) {
-	zombie.SetReferenceHeading(0)
-	c := time.Tick(1 * time.Second)
-	go func() {
-		heading := 0
-		for {
-			select {
-			case <-c:
-				zombie.Walk(100, heading)
-				heading += 6
-			case event, ok := <-zombie.Events:
-				if !ok {
-					return
-				}
-				log.Printf("Event %+v\n.", event)
-				heading += 180
-				zombie.Walk(100, heading)
-			}
-		}
-	}()
-}
-
 func main() {
+	// eg. go run example.go -device COM2 -zombie
 	flag.Parse()
 
-	game.RegisterZombie(zombieTicker)
-	game.RegisterHuman(zombieTicker)
+	game.RegisterHuman(clock)
+	game.RegisterZombie(clock)
 
 	err := game.Start("bob", *zombie, *device, *server)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// clock rotates 6 degrees every second
+func clock(robot game.Robot) {
+	tick := time.Tick(1 * time.Second)
+	go func() {
+		heading := 0 // 0-359 degrees
+		speed := 1   // (stopped) 0-255 (fast)
+		for {
+			select {
+			case <-tick: // Every tick
+				robot.Walk(speed, heading)
+				heading = (heading + 6) % 360
+			case event, ok := <-robot.Events:
+				if !ok {
+					return
+				}
+				log.Printf("Event %+v\n.", event)
+				heading = (heading + 180) % 360
+				robot.Walk(speed, heading)
+			}
+		}
+	}()
 }
