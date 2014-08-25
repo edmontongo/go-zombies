@@ -73,6 +73,10 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 		return Invalid, Invalid, err
 	}
 
+	if !c.Valid() {
+		return c.Role, Unknown, nil
+	}
+
 	result := make(chan Role)
 	c.response = result
 	r.collisionQueue <- &c
@@ -86,7 +90,7 @@ func (r *Room) collisionManager(c <-chan *Collision) {
 		t := time.After(400 * time.Millisecond)
 		select {
 		case c2 := <-c:
-			if !c2.Strong() && !c1.Strong() {
+			if c1.Attack() == c2.Attack() {
 				c1.response <- Unknown
 				c1 = c2
 				goto top
