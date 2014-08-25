@@ -113,9 +113,10 @@ func (r *Room) collisionManager(c <-chan queuedCollision) {
 		t := time.After(400 * time.Millisecond)
 		select {
 		case p2 := <-c:
+			oldp1, oldp2 := p1.Role, p2.Role
 			r.collide(p1.player, p2.player)
-			p2.response <- p1.Role
-			p1.response <- p2.Role
+			p2.response <- oldp1
+			p1.response <- oldp2
 		case _ = <-t:
 			p1.response <- Wall
 		}
