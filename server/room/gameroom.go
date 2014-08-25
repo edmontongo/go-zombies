@@ -87,7 +87,7 @@ func (r *Room) collisionManager(c <-chan *Collision) {
 		select {
 		case c2 := <-c:
 			if !c2.Strong() && !c1.Strong() {
-				c1.response <- Wall
+				c1.response <- Unknown
 				c1 = c2
 				goto top
 			}
