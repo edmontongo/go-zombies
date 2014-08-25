@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/edmontongo/go-zombies/server/room"
-	"github.com/edmontongo/gobot/platforms/sphero"
 )
 
 var addr = flag.String("addr", ":11235", "Address to bind http server to")
@@ -91,29 +90,29 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	name := req.FormValue("id")
-	if name == "" {
+	id := req.FormValue("id")
+	if id == "" {
 		http.Error(w, `{"error": "No id provided!"}`, http.StatusBadRequest)
 		return
 	}
 
-	var c sphero.Collision
+	var c room.Collision
 	data := req.FormValue("data")
 	if data != "" {
-		err := unwrap(data, &c)
+		err := unwrap(data, &c.Collision)
 		if err != nil {
 			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
 		}
-		log.Printf("Collision from %s: %v", name, c)
+		log.Printf("Collision from %s: %v", id, c.Collision)
 	}
 
-	id, err := room.IdFromString(name)
+	c.Id, err = room.IdFromString(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	r, hit, err := sim.Collision(id)
+	r, hit, err := sim.Collision(c.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

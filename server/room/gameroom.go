@@ -10,7 +10,15 @@ import (
 	"math/rand"
 	"net"
 	"time"
+
+	"github.com/edmontongo/gobot/platforms/sphero"
 )
+
+type Collision struct {
+	Id        Id
+	player    *player
+	Collision sphero.Collision
+}
 
 type queuedCollision struct {
 	*player
