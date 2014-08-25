@@ -27,7 +27,8 @@ func (c Collision) String() string {
 
 type queuedCollision struct {
 	*player
-	response chan<- Role
+	response  chan<- Role
+	collision Collision
 }
 
 type Room struct {
@@ -103,7 +104,7 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 	r.recentCollisions = append(r.recentCollisions[1:], &c)
 
 	result := make(chan Role)
-	r.collisionQueue <- queuedCollision{c.player, result}
+	r.collisionQueue <- queuedCollision{c.player, result, c}
 
 	return c.player.Role, <-result, nil
 }
