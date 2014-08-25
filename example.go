@@ -29,7 +29,7 @@ import (
 var device = flag.String("device", "/dev/tty.Sphero-RBG-RN-SPP", "Device for the Sphero.")
 
 // game server address
-var server = flag.String("server", "http://localhost:11235", "Server address to connect to.")
+var server = flag.String("server", "http://10.161.1.230:11235", "Server address to connect to.")
 
 // start as a zombie (defaults to human)
 var zombie = flag.Bool("zombie", false, "Runs the example as a zombie.")
