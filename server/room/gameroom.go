@@ -94,7 +94,7 @@ func (r *Room) collide(c1, c2 *Collision) (r1, r2 Role) {
 func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 	c.player, err = r.player(c.Id)
 	if err != nil {
-		return Unknown, Wall, err
+		return Invalid, Invalid, err
 	}
 
 	r.recentCollisions = append(r.recentCollisions[1:], &c)
@@ -116,7 +116,7 @@ func (r *Room) collisionManager(c <-chan *Collision) {
 			c2.response <- oldp1
 			c1.response <- oldp2
 		case _ = <-t:
-			c1.response <- Wall
+			c1.response <- Unknown
 		}
 	}
 }

@@ -10,18 +10,18 @@ import (
 type Role uint
 
 const (
-	Unknown = Role(iota)
+	Invalid = Role(iota)
 	Zombie
 	Human
-	Wall
+	Unknown
 	lastRole
 )
 
 var roleStrings = []string{
-	"Unknown",
+	"Invalid",
 	"Zombie",
 	"Human",
-	"Wall",
+	"Unknown",
 }
 
 func (r Role) String() string {
@@ -37,7 +37,7 @@ func ResolveRole(s string) Role {
 			return Role(i)
 		}
 	}
-	return Unknown
+	return Invalid
 }
 
 // Id is a unique (per room) identifier for communicating player ids with the Room.

@@ -75,7 +75,7 @@ func registerPlayer(w http.ResponseWriter, req *http.Request) {
 		case "zombie":
 			role = room.Zombie
 		default:
-			http.Error(w, fmt.Sprintf(`{"error": "Unknown role type '%s'!"`, req.FormValue("role")), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf(`{"error": "Invalid role type '%s'!"`, req.FormValue("role")), http.StatusBadRequest)
 		}
 	}
 

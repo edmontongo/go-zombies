@@ -37,13 +37,13 @@ func New(name, url string, zombie bool) (*Client, error) {
 func (c *Client) Collide(data sphero.Collision) (newRole, hitRole room.Role, err error) {
 	json, err := wrap(data)
 	if err != nil {
-		return room.Unknown, room.Unknown, err
+		return room.Invalid, room.Invalid, err
 	}
 	request := fmt.Sprintf("%s/collision?id=%d&data=%s", c.roomUrl, c.id, json)
 	var collision collisionResponse
 
 	if err := getResponse(request, &collision); err != nil {
-		return room.Unknown, room.Unknown, err
+		return room.Invalid, room.Invalid, err
 	}
 	// log.Println("Hit a", collision.Hit)
 	return room.ResolveRole(collision.Role), room.ResolveRole(collision.Hit), nil
