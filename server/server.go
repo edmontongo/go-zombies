@@ -117,19 +117,19 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var c room.Collision
+	c.Id, err = room.IdFromString(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	data := req.FormValue("data")
 	if data != "" {
 		err := unwrap(data, &c.Collision)
 		if err != nil {
 			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
 		}
-		log.Printf("Collision from %s: %v", id, c.Collision)
-	}
-
-	c.Id, err = room.IdFromString(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		log.Printf("Collision from %s: %+v", id, c.Collision)
 	}
 
 	c.ServerTime = time.Now()

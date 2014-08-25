@@ -11,21 +11,7 @@ import (
 	"net"
 	"sort"
 	"time"
-
-	"github.com/edmontongo/gobot/platforms/sphero"
 )
-
-type Collision struct {
-	Id         Id
-	ServerTime time.Time
-	*player
-	Collision sphero.Collision
-	response  chan<- Role
-}
-
-func (c Collision) String() string {
-	return fmt.Sprintf("%v: %s was %s to (??) from %+v", c.ServerTime, c.player.name, c.player.Role, c.Collision)
-}
 
 type Room struct {
 	players          map[Id]*player
@@ -70,21 +56,11 @@ func (r *Room) collide(c1, c2 *Collision) (r1, r2 Role) {
 		return c1.Role, c2.Role
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	winner := rand.Float32() > 0.30
 	// Switch players for now, better math will be implemented later.
-	if c2.Role == Zombie {
-		if winner {
-			c1.Role = Zombie
-		} else {
-			c2.Role = Human
-		}
+	if c1.Collision.Speed > c2.Collision.Speed {
+		c2.Role = c1.Role
 	} else {
-		if winner {
-			c2.Role = Zombie
-		} else {
-			c1.Role = Human
-		}
+		c1.Role = c2.Role
 	}
 
 	return c1.Role, c2.Role
@@ -97,8 +73,6 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 		return Invalid, Invalid, err
 	}
 
-	r.recentCollisions = append(r.recentCollisions[1:], &c)
-
 	result := make(chan Role)
 	c.response = result
 	r.collisionQueue <- &c
@@ -108,9 +82,18 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 
 func (r *Room) collisionManager(c <-chan *Collision) {
 	for c1 := range c {
+	top:
 		t := time.After(400 * time.Millisecond)
 		select {
 		case c2 := <-c:
+			if !c2.Strong() && !c1.Strong() {
+				c1.response <- Wall
+				c1 = c2
+				goto top
+			}
+
+			r.recentCollisions = append(r.recentCollisions[2:], c1, c2)
+			log.Println("What??!?!")
 			oldp1, oldp2 := c1.Role, c2.Role
 			r.collide(c1, c2)
 			c2.response <- oldp1
