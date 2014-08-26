@@ -45,7 +45,7 @@ func (c *Client) Collide(data sphero.Collision) (newRole, hitRole room.Role, err
 	var collision collisionResponse
 
 	if err := getResponse(request, &collision); err != nil {
-		tc, err := New(c.name, c.url, false)
+		tc, err := New(c.name, c.roomUrl, false)
 		if err != nil {
 			*c = *tc
 			return room.Human, room.Unknown, nil
