@@ -32,7 +32,7 @@ func (c Collision) Attack() bool {
 }
 
 func (c Collision) Vulnerable() bool {
-	return c.Collision.Speed < 10 && (c.Collision.XMagnitue+c.Collision.YMagnitude) > 75
+	return c.Collision.Speed < 10 && (c.Collision.XMagnitude+c.Collision.YMagnitude) > 75
 }
 
 func (c Collision) Strong() bool {
