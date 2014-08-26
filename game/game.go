@@ -121,7 +121,7 @@ func Start(name string, zombie bool, device string, server string) error {
 
 func work() {
 	// threshold at speed of 0, add value at maximum speed
-	robot.driver.ConfigureCollisionDetectionRaw(20, 0, 20, 0, 50)
+	robot.driver.ConfigureCollisionDetectionRaw(40, 60, 40, 60, 100)
 	robot.driver.SetBackLED(0xff)
 
 	gobot.On(robot.driver.Event("collision"), func(data interface{}) {
