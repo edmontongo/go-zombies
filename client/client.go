@@ -13,6 +13,7 @@ import (
 type Client struct {
 	roomUrl string
 	id      room.Id
+	name    string
 }
 
 func New(name, url string, zombie bool) (*Client, error) {
@@ -29,6 +30,7 @@ func New(name, url string, zombie bool) (*Client, error) {
 	c := Client{
 		id:      room.Id(register.PlayerId),
 		roomUrl: url,
+		name:    name,
 	}
 
 	return &c, nil
@@ -43,6 +45,11 @@ func (c *Client) Collide(data sphero.Collision) (newRole, hitRole room.Role, err
 	var collision collisionResponse
 
 	if err := getResponse(request, &collision); err != nil {
+		tc, err := New(c.name, c.Url, false)
+		if err != nil {
+			*c = *tc
+			return room.Human, room.Unknown, nil
+		}
 		return room.Invalid, room.Invalid, err
 	}
 	// log.Println("Hit a", collision.Hit)
