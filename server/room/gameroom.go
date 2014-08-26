@@ -77,6 +77,8 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 		return c.Role, Unknown, nil
 	}
 
+	r.recentCollisions = append(r.recentCollisions[1:], &c)
+
 	result := make(chan Role)
 	c.response = result
 	r.collisionQueue <- &c
@@ -96,8 +98,6 @@ func (r *Room) collisionManager(c <-chan *Collision) {
 				goto top
 			}
 
-			r.recentCollisions = append(r.recentCollisions[2:], c1, c2)
-			log.Println("What??!?!")
 			oldp1, oldp2 := c1.Role, c2.Role
 			r.collide(c1, c2)
 			c2.response <- oldp1
