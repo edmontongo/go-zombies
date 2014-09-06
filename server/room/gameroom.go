@@ -58,8 +58,10 @@ func (r *Room) collide(c1, c2 *Collision) (r1, r2 Role) {
 
 	// Switch players for now, better math will be implemented later.
 	if c1.Collision.Speed > c2.Collision.Speed {
+		log.Printf("%s beat %s!", c1.Description(), c2.Description())
 		c2.Role = c1.Role
 	} else {
+		log.Printf("%s beat %s!", c2.Description(), c1.Description())
 		c1.Role = c2.Role
 	}
 
@@ -76,6 +78,8 @@ func (r *Room) Collision(c Collision) (newRole, hit Role, err error) {
 	if !c.Valid() {
 		return c.Role, Unknown, nil
 	}
+
+	log.Printf("Collision from %s: %v, %+v", c.name, c.Attack(), c.Collision)
 
 	r.recentCollisions = append(r.recentCollisions[1:], &c)
 

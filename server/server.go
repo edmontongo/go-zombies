@@ -129,7 +129,6 @@ func collidePlayer(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			http.Error(w, `{"error": "Bad data!"}`, http.StatusBadRequest)
 		}
-		log.Printf("Collision from %s: %+v", id, c.Collision)
 	}
 
 	c.ServerTime = time.Now()
